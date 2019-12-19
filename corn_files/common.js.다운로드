@@ -1,0 +1,278 @@
+var TINY = {};
+
+function T$(i) {
+  return document.getElementById(i);
+}
+
+function T$$(e, p) {
+  return p.getElementsByTagName(e);
+}
+
+TINY.fader = function () {
+  function fade(n, p) {
+    this.n = n;
+    this.init(p)
+  }
+
+  fade.prototype.init = function (p) {
+    var s = T$(p.id), u = this.u = T$$('li', s), l = u.length,
+        i = this.l = this.c = this.z = 0;
+    if (p.navid && p.activeclass) {
+      this.g = T$$('li', T$(p.navid));
+      this.s = p.activeclass
+    }
+    s.style.overflow = 'hidden';
+    this.a = p.auto || 0;
+    this.p = p.resume || 0;
+    for (i; i < l; i++) {
+      if (u[i].parentNode == s) {
+        u[i].style.position = 'absolute';
+        this.l++;
+        u[i].o = p.visible ? 100 : 0;
+        u[i].style.opacity = u[i].o / 100;
+        u[i].style.filter = 'alpha(opacity=' + u[i].o + ')'
+      }
+    }
+    this.pos(p.position || 0, this.a ? 1 : 0, p.visible)
+  },
+      fade.prototype.auto = function () {
+        this.u.ai = setInterval(new Function(this.n + '.move(1,1)'),
+            this.a * 1000)
+      },
+      fade.prototype.move = function (d, a) {
+        var n = this.c + d,
+            i = d == 1 ? n == this.l ? 0 : n : n < 0 ? this.l - 1 : n;
+        this.pos(i, a)
+      },
+      fade.prototype.pos = function (i, a, v) {
+        var p = this.u[i];
+        this.z++;
+        p.style.zIndex = this.z;
+        clearInterval(p.si);
+
+        clearInterval(this.u.ai);
+        this.u.ai = 0;
+        this.c = i;
+        if (p.o >= 100 && !v) {
+          p.o = 0;
+          p.style.opacity = 0;
+          p.style.filter = 'alpha(opacity=0)'
+        }
+        if (this.g) {
+          for (var x = 0; x < this.l; x++) {
+            this.g[x].className = x == i ? this.s : ''
+          }
+        }
+        p.si = setInterval(new Function(this.n + '.fade(' + i + ',' + a + ')'),
+            20)
+      },
+      fade.prototype.fade = function (i, a) {
+        var p = this.u[i];
+        if (p.o >= 100) {
+          clearInterval(p.si);
+          if ((a || (this.a && this.p)) && !this.u.ai) {
+            this.auto()
+          }
+        } else {
+          p.o += 5;
+          p.style.opacity = p.o / 100;
+          p.style.filter = 'alpha(opacity=' + p.o + ')'
+        }
+      };
+  return {fade: fade}
+}();
+
+var TINYevent = {};
+
+function T$(i) {
+  return document.getElementById(i);
+}
+
+function T$$(e, p) {
+  return p.getElementsByTagName(e);
+}
+
+TINYevent.slider = function () {
+  function slide(n, p) {
+    this.n = n;
+    this.init(p);
+  }
+
+  slide.prototype.init = function (p) {
+    var s = T$(p.id), u = this.u = T$$('ul', s)[0], c = T$$('li', u),
+        l = c.length, i = this.l = this.c = 0;
+    if (p.navid && p.activeclass) {
+      this.g = T$$('li', T$(p.navid));
+      this.s = p.activeclass;
+    }
+    this.a = p.auto || 0;
+    this.p = p.resume || 0;
+    this.v = p.vertical || 0;
+    s.style.overflow = 'hidden';
+    for (i; i < l; i++) {
+      if (c[i].parentNode == u) {
+        this.l++
+      }
+    }
+    if (this.v) {
+      ;
+      u.style.top = 0;
+      this.h = p.height || c[0].offsetHeight;
+      u.style.height = (this.l * this.h) + 'px';
+    } else {
+      u.style.left = 0;
+      this.w = p.width || c[0].offsetWidth;
+      u.style.width = (this.l * this.w) + 'px';
+    }
+    this.pos(p.position || 0, this.a ? 1 : 0)
+  },
+      slide.prototype.auto = function () {
+        this.u.ai = setInterval(new Function(this.n + '.move(1,1)'),
+            this.a * 1000);
+      },
+      slide.prototype.move = function (d, a) {
+        var n = this.c + d,
+            i = d == 1 ? n == this.l ? 0 : n : n < 0 ? this.l - 1 : n;
+        this.pos(i, a);
+      },
+      slide.prototype.pos = function (p, a) {
+        clearInterval(this.u.ai);
+        clearInterval(this.u.si);
+        var o = this.v ? parseInt(this.u.style.top) : parseInt(
+            this.u.style.left),
+            t = this.v ? p * this.h : p * this.w, d = t > Math.abs(o) ? 1 : -1;
+        t = t * -1;
+        this.c = p;
+        if (this.g) {
+          for (var i = 0; i < this.l; i++) {
+            this.g[i].className = i == p ? this.s : '';
+          }
+        }
+        this.u.si = setInterval(
+            new Function(this.n + '.slide(' + t + ',' + d + ',' + a + ')'), 20);
+      },
+      slide.prototype.slide = function (t, d, a) {
+        var o = this.v ? parseInt(this.u.style.top) : parseInt(
+            this.u.style.left);
+        if (o == t) {
+          clearInterval(this.u.si);
+          if (a || (this.a && this.p)) {
+            this.auto();
+          }
+        } else {
+          var v = o - Math.ceil(Math.abs(t - o) * .15) * d + 'px';
+          this.v ? this.u.style.top = v : this.u.style.left = v;
+        }
+      };
+  return {slide: slide};
+}();
+
+var TINYshop = {};
+
+function T$(i) {
+  return document.getElementById(i);
+}
+
+function T$$(e, p) {
+  return p.getElementsByTagName(e);
+}
+
+TINYshop.slider = function () {
+  function slide(n, p) {
+    this.n = n;
+    this.init(p);
+  }
+
+  slide.prototype.init = function (p) {
+    var s = T$(p.id), u = this.u = T$$('ul', s)[0], c = T$$('li', u),
+        l = c.length, i = this.l = this.c = 0;
+    if (p.navid && p.activeclass) {
+      this.g = T$$('li', T$(p.navid));
+      this.s = p.activeclass;
+    }
+    this.a = p.auto || 0;
+    this.p = p.resume || 0;
+    this.v = p.vertical || 0;
+    s.style.overflow = 'hidden';
+    for (i; i < l; i++) {
+      if (c[i].parentNode == u) {
+        this.l++;
+      }
+    }
+    if (this.v) {
+      ;
+      u.style.top = 0;
+      this.h = p.height || c[0].offsetHeight;
+      u.style.height = (this.l * this.h) + 'px';
+    } else {
+      u.style.left = 0;
+      this.w = p.width || c[0].offsetWidth;
+      u.style.width = (this.l * this.w) + 'px';
+    }
+    this.pos(p.position || 0, this.a ? 1 : 0);
+  },
+      slide.prototype.auto = function () {
+        this.u.ai = setInterval(new Function(this.n + '.move(1,1)'),
+            this.a * 1000);
+      },
+      slide.prototype.move = function (d, a) {
+        var n = this.c + d,
+            i = d == 1 ? n == this.l ? 0 : n : n < 0 ? this.l - 1 : n;
+        this.pos(i, a);
+      },
+      slide.prototype.pos = function (p, a) {
+        clearInterval(this.u.ai);
+        clearInterval(this.u.si);
+        var o = this.v ? parseInt(this.u.style.top) : parseInt(
+            this.u.style.left),
+            t = this.v ? p * this.h : p * this.w, d = t > Math.abs(o) ? 1 : -1;
+        t = t * -1;
+        this.c = p;
+        if (this.g) {
+          for (var i = 0; i < this.l; i++) {
+            this.g[i].className = i == p ? this.s : '';
+          }
+        }
+        this.u.si = setInterval(
+            new Function(this.n + '.slide(' + t + ',' + d + ',' + a + ')'), 20);
+      },
+      slide.prototype.slide = function (t, d, a) {
+        var o = this.v ? parseInt(this.u.style.top) : parseInt(
+            this.u.style.left);
+        if (o == t) {
+          clearInterval(this.u.si);
+          if (a || (this.a && this.p)) {
+            this.auto();
+          }
+        } else {
+          var v = o - Math.ceil(Math.abs(t - o) * .15) * d + 'px';
+          this.v ? this.u.style.top = v : this.u.style.left = v;
+        }
+      };
+  return {slide: slide};
+}();
+
+function commonPageMove(url, sCate, sWord, page) {
+  location.href = url + "/" + sCate + "/" + encodeURIComponent(sWord) + "/" + page;
+}
+
+/**
+ * alt 또는 title 달때 문자열 중 따옴표가 표함된 경우 잘려서 오류가 발생하지 않도록 문자열을 치환
+ * @param tit
+ * @returns
+ */
+function imbedTitle(tit) {
+  if(tit == null || tit == 'null') {
+    return '';
+  }
+
+  var str = tit;
+  str = str.replace(/\"/g, '&quot;');
+  str = str.replace(/ /g,'&nbsp;');
+  str = str.replace(/</g,'&lt;');
+  str = str.replace(/>/g,'&gt;');
+  str = str.replace(/‘/g,'');
+  str = str.replace(/’/g,'');
+  str = str.replace(/'/g,'');
+  return str;
+}
